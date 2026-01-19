@@ -65,6 +65,10 @@ def build_triple_triad():
         "from .cards import TRIPLE_TRIAD_CARDS\n\n",
         ""
     )
+    triple_triad_content = triple_triad_content.replace(
+        "from .cards import TRIPLE_TRIAD_CARDS, CARD_LEVELS\n\n",
+        ""
+    )
     
     # Strip imports from game_content that won't exist when dropped into MuZero
     # The Game class will use the locally-defined AbstractGame and TripleTriad

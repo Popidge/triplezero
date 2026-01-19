@@ -14,8 +14,8 @@ class TestCardDefinitions:
     """Tests for card definitions and values."""
     
     def test_all_cards_defined(self):
-        """Verify all 10 cards are defined."""
-        assert len(TRIPLE_TRIAD_CARDS) == 10
+        """Verify all 110 cards from FF8 are defined."""
+        assert len(TRIPLE_TRIAD_CARDS) == 110
     
     def test_card_values_are_tuples(self):
         """Verify all card values are tuples of 4 integers."""
@@ -25,10 +25,10 @@ class TestCardDefinitions:
             assert all(isinstance(v, int) for v in values), f"{card_name} contains non-integer values"
     
     def test_card_values_in_range(self):
-        """Verify all card values are between 1 and 6 (typical Triple Triad range)."""
+        """Verify all card values are between 1 and 10 (FF8 uses A=10)."""
         for card_name, values in TRIPLE_TRIAD_CARDS.items():
             for i, value in enumerate(values):
-                assert 1 <= value <= 6, f"{card_name} face {i} has value {value} out of range"
+                assert 1 <= value <= 10, f"{card_name} face {i} has value {value} out of range"
 
 
 class TestTripleTriadInitialization:
@@ -52,10 +52,23 @@ class TestTripleTriadInitialization:
         assert len(game.hands[0]) == 5
         assert len(game.hands[1]) == 5
         
-        # Hands should be mutually exclusive
+        # Level 9-10 cards must be unique between players
         hand0_set = set(game.hands[0])
         hand1_set = set(game.hands[1])
-        assert len(hand0_set.intersection(hand1_set)) == 0
+        
+        # Check that level 9-10 cards are unique
+        # (first 4 cards can overlap, but 5th card must be unique)
+        # With shuffled hands, we need to check the level 9-10 card specifically
+        from games.triple_triad.cards import CARD_LEVELS
+        p0_high_cards = [c for c in game.hands[0] if CARD_LEVELS[c] >= 9]
+        p1_high_cards = [c for c in game.hands[1] if CARD_LEVELS[c] >= 9]
+        
+        # Each player should have exactly 1 card from levels 9-10
+        assert len(p0_high_cards) == 1
+        assert len(p1_high_cards) == 1
+        
+        # Those cards should be different
+        assert p0_high_cards[0] != p1_high_cards[0]
         
         # All 10 cards should be distributed
         assert len(hand0_set) + len(hand1_set) == 10
@@ -646,6 +659,59 @@ class TestHandRetrieval:
         # Hands should be different
         assert len(hand1) == 5
         assert len(hand2) == 4
+
+
+class TestBalancedDealing:
+    """Tests for the balanced dealing algorithm."""
+    
+    def test_each_player_has_one_card_per_level_range(self):
+        """Test that each player gets exactly 1 card from each level range."""
+        from games.triple_triad.cards import CARD_LEVELS
+        
+        game = TripleTriad()
+        
+        for player in [0, 1]:
+            hand = game.hands[player]
+            level_ranges = {
+                '1-2': 0,
+                '3-4': 0,
+                '5-6': 0,
+                '7-8': 0,
+                '9-10': 0,
+            }
+            
+            for card in hand:
+                level = CARD_LEVELS[card]
+                if level <= 2:
+                    level_ranges['1-2'] += 1
+                elif level <= 4:
+                    level_ranges['3-4'] += 1
+                elif level <= 6:
+                    level_ranges['5-6'] += 1
+                elif level <= 8:
+                    level_ranges['7-8'] += 1
+                else:
+                    level_ranges['9-10'] += 1
+            
+            # Each player should have exactly 1 card from each range
+            for range_name, count in level_ranges.items():
+                assert count == 1, f"Player {player} has {count} cards in range {range_name}, expected 1"
+    
+    def test_level_9_10_cards_are_unique(self):
+        """Test that level 9-10 cards are unique between players."""
+        from games.triple_triad.cards import CARD_LEVELS
+        
+        game = TripleTriad()
+        
+        p0_high_cards = [c for c in game.hands[0] if CARD_LEVELS[c] >= 9]
+        p1_high_cards = [c for c in game.hands[1] if CARD_LEVELS[c] >= 9]
+        
+        # Each player has exactly 1 card from levels 9-10
+        assert len(p0_high_cards) == 1
+        assert len(p1_high_cards) == 1
+        
+        # And they are different
+        assert p0_high_cards[0] != p1_high_cards[0]
 
 
 if __name__ == "__main__":

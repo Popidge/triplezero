@@ -3,7 +3,7 @@ from typing import Tuple, List, Optional, Dict, Any
 import numpy as np
 import random
 
-from .cards import TRIPLE_TRIAD_CARDS
+from .cards import TRIPLE_TRIAD_CARDS, CARD_LEVELS
 
 
 class TripleTriad:
@@ -69,13 +69,54 @@ class TripleTriad:
         self._initialize_game()
     
     def _initialize_game(self) -> None:
-        """Deal cards to players and determine starting player."""
-        # Shuffle cards and deal 5 to each player
-        shuffled_cards = self.card_names.copy()
-        random.shuffle(shuffled_cards)
+        """Deal cards to players using balanced level distribution.
         
-        self.hands[0] = shuffled_cards[:5]
-        self.hands[1] = shuffled_cards[5:10]
+        Each player gets:
+        - 1 card from levels 1-2
+        - 1 card from levels 3-4
+        - 1 card from levels 5-6
+        - 1 card from levels 7-8
+        - 1 card from levels 9-10 (must be unique between players)
+        """
+        # Group cards by level ranges
+        level_1_2 = [c for c in self.card_names if CARD_LEVELS[c] <= 2]
+        level_3_4 = [c for c in self.card_names if 3 <= CARD_LEVELS[c] <= 4]
+        level_5_6 = [c for c in self.card_names if 5 <= CARD_LEVELS[c] <= 6]
+        level_7_8 = [c for c in self.card_names if 7 <= CARD_LEVELS[c] <= 8]
+        level_9_10 = [c for c in self.card_names if CARD_LEVELS[c] >= 9]
+        
+        # Shuffle each level group
+        random.shuffle(level_1_2)
+        random.shuffle(level_3_4)
+        random.shuffle(level_5_6)
+        random.shuffle(level_7_8)
+        random.shuffle(level_9_10)
+        
+        # Deal to player 0: 1 card from each level range
+        hand_0 = [
+            level_1_2[0],
+            level_3_4[0],
+            level_5_6[0],
+            level_7_8[0],
+            level_9_10[0],
+        ]
+        
+        # Deal to player 1: 1 card from each level range (9-10 must be unique)
+        # Use index 1 for 9-10 to ensure uniqueness
+        hand_1 = [
+            level_1_2[1] if len(level_1_2) > 1 else level_1_2[0],
+            level_3_4[1] if len(level_3_4) > 1 else level_3_4[0],
+            level_5_6[1] if len(level_5_6) > 1 else level_5_6[0],
+            level_7_8[1] if len(level_7_8) > 1 else level_7_8[0],
+            level_9_10[1] if len(level_9_10) > 1 else level_9_10[0],
+        ]
+        
+        # Shuffle each player's hand so cards aren't ordered by level
+        random.shuffle(hand_0)
+        random.shuffle(hand_1)
+        
+        self.hands[0] = hand_0
+        self.hands[1] = hand_1
         
         # Random starting player (0 or 1)
         self.current_player = random.randint(0, 1)

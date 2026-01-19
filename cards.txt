@@ -1,6 +1,14 @@
 # Card list. Format: "Name": (N, E, S, W)
+# 
+# Also includes CARD_LEVELS dict for dealing algorithm:
+# - 1 card from levels 1-2
+# - 1 card from levels 3-4
+# - 1 card from levels 5-6
+# - 1 card from levels 7-8
+# - 1 card from levels 9-10 (must be unique between players)
 
 TRIPLE_TRIAD_CARDS = {
+    # Level 1 Cards
     "Geezard": (1, 4, 5, 1),
     "Fungar": (5, 1, 1, 3),
     "Bite Bug": (1, 3, 3, 5),
@@ -11,4 +19,155 @@ TRIPLE_TRIAD_CARDS = {
     "Fastitocalon-F": (3, 5, 2, 1),
     "Blood Soul": (2, 1, 6, 1),
     "Caterchipillar": (4, 2, 4, 3),
+    "Cockatrice": (6, 1, 2, 6),
+    
+    # Level 2 Cards
+    "Grat": (7, 1, 3, 1),
+    "Buel": (6, 2, 2, 3),
+    "Mesmerize": (5, 3, 3, 4),
+    "Glacial Eye": (6, 1, 4, 3),
+    "Belhelmel": (3, 4, 5, 3),
+    "Thrustaevis": (5, 3, 2, 5),
+    "Anacondaur": (5, 1, 3, 5),
+    "Creeps": (5, 2, 5, 2),
+    "Grendel": (4, 4, 5, 2),
+    "Jelleye": (3, 2, 1, 7),
+    "Grand Mantis": (5, 2, 5, 3),
+    
+    # Level 3 Cards
+    "Forbidden": (6, 6, 3, 2),
+    "Armadodo": (6, 3, 1, 6),
+    "TriFace": (3, 5, 5, 5),
+    "Fastitcalon": (7, 5, 1, 3),
+    "Snow Lion": (7, 1, 5, 3),
+    "Ochu": (5, 6, 3, 3),
+    "SAM08G": (5, 6, 2, 4),
+    "Death Claw": (4, 4, 7, 2),
+    "Cactaur": (6, 2, 6, 3),
+    "Tonberry": (3, 6, 4, 4),
+    "Abyss Worm": (7, 2, 3, 5),
+    
+    # Level 4 Cards
+    "Turtapod": (2, 3, 6, 7),
+    "Vysage": (6, 5, 4, 5),
+    "T-Rexaur": (4, 6, 2, 7),
+    "Bomb": (2, 7, 6, 3),
+    "Blitz": (1, 6, 4, 7),
+    "Wendigo": (7, 3, 1, 6),
+    "Torama": (7, 4, 4, 4),
+    "Imp": (3, 7, 3, 6),
+    "Blue Dragon": (6, 2, 7, 3),
+    "Adamantiose": (4, 5, 5, 6),
+    "Hexadragon": (7, 5, 4, 3),
+    
+    # Level 5 Cards
+    "Iron Giant": (6, 5, 6, 5),
+    "Behemoth": (3, 6, 5, 7),
+    "Chimera": (7, 6, 5, 3),
+    "PuPu": (3, 10, 2, 1),
+    "Elastiod": (6, 2, 6, 7),
+    "GIM47N": (5, 5, 7, 4),
+    "Malboro": (7, 7, 4, 2),
+    "Ruby Dragon": (7, 2, 7, 4),
+    "Elnoyle": (5, 3, 7, 6),
+    "Tonberry King": (4, 6, 7, 4),
+    "Wedge, Biggs": (6, 6, 2, 7),
+    
+    # Level 6 Cards
+    "Fujin, Raijin": (2, 8, 8, 4),
+    "Elvoret": (7, 8, 3, 4),
+    "X-ATM092": (4, 8, 4, 3),
+    "Grenaldo": (7, 2, 8, 5),
+    "Gerogero": (1, 8, 8, 3),
+    "Iguion": (8, 2, 8, 2),
+    "Abadon": (6, 8, 4, 5),
+    "Trauma": (4, 8, 5, 6),
+    "Oilboyle": (1, 8, 4, 8),
+    "Shumi Tribe": (6, 5, 8, 4),
+    "Krysta": (7, 5, 8, 1),
+    
+    # Level 7 Cards
+    "Propagator": (8, 4, 4, 8),
+    "Jumbo Cactaur": (8, 8, 4, 4),
+    "Tri-Point": (8, 5, 2, 8),
+    "Gargantua": (5, 6, 6, 8),
+    "Mobile Type 8": (8, 6, 7, 3),
+    "Sphinxara": (8, 3, 5, 8),
+    "Tiamat": (8, 8, 5, 4),
+    "BGH251F2": (5, 7, 8, 5),
+    "Red Giant": (6, 8, 4, 7),
+    "Catoblepas": (1, 8, 7, 7),
+    "Ultima Weapon": (7, 7, 2, 8),
+    
+    # Level 8 Cards
+    "Chubby Chocobo": (4, 4, 8, 9),
+    "Angelo": (9, 6, 7, 3),
+    "Gilgamesh": (3, 7, 9, 6),
+    "MinMog": (9, 3, 9, 2),
+    "Chicobo": (9, 4, 8, 4),
+    "Quezacotl": (2, 9, 9, 4),
+    "Shiva": (6, 7, 4, 9),
+    "Ifrit": (9, 6, 2, 8),
+    "Siren": (9, 6, 2, 8),
+    "Sacred": (5, 1, 9, 9),
+    "Minotaur": (9, 9, 2, 5),
+    
+    # Level 9 Cards
+    "Carbuncle": (8, 4, 10, 4),
+    "Diablos": (5, 10, 8, 3),
+    "Leviathan": (7, 10, 1, 7),
+    "Odin": (8, 10, 3, 5),
+    "Pandemonia": (10, 1, 7, 7),
+    "Cerberus": (7, 4, 6, 10),
+    "Alexander": (9, 10, 4, 2),
+    "Phoenix": (7, 2, 7, 10),
+    "Bahumut": (10, 8, 2, 6),
+    "Doomtrain": (3, 1, 10, 10),
+    "Eden": (4, 4, 9, 10),
+    
+    # Level 10 Cards
+    "Ward": (10, 7, 2, 8),
+    "Kiros": (6, 7, 6, 10),
+    "Laguna": (5, 10, 3, 9),
+    "Selphie": (10, 8, 4, 6),
+    "Quistis": (9, 6, 10, 2),
+    "Irvine": (2, 6, 9, 10),
+    "Zell": (8, 5, 10, 6),
+    "Rinoa": (4, 10, 2, 10),
+    "Edea": (10, 10, 3, 3),
+    "Seifer": (6, 9, 10, 4),
+    "Squall": (10, 10, 9, 6),
+}
+
+CARD_LEVELS = {
+    # Level 1
+    "Geezard": 1, "Fungar": 1, "Bite Bug": 1, "Red Bat": 1, "Blobra": 1,
+    "Gayla": 1, "Gesper": 1, "Fastitocalon-F": 1, "Blood Soul": 1, "Caterchipillar": 1, "Cockatrice": 1,
+    # Level 2
+    "Grat": 2, "Buel": 2, "Mesmerize": 2, "Glacial Eye": 2, "Belhelmel": 2,
+    "Thrustaevis": 2, "Anacondaur": 2, "Creeps": 2, "Grendel": 2, "Jelleye": 2, "Grand Mantis": 2,
+    # Level 3
+    "Forbidden": 3, "Armadodo": 3, "TriFace": 3, "Fastitcalon": 3, "Snow Lion": 3,
+    "Ochu": 3, "SAM08G": 3, "Death Claw": 3, "Cactaur": 3, "Tonberry": 3, "Abyss Worm": 3,
+    # Level 4
+    "Turtapod": 4, "Vysage": 4, "T-Rexaur": 4, "Bomb": 4, "Blitz": 4,
+    "Wendigo": 4, "Torama": 4, "Imp": 4, "Blue Dragon": 4, "Adamantiose": 4, "Hexadragon": 4,
+    # Level 5
+    "Iron Giant": 5, "Behemoth": 5, "Chimera": 5, "PuPu": 5, "Elastiod": 5,
+    "GIM47N": 5, "Malboro": 5, "Ruby Dragon": 5, "Elnoyle": 5, "Tonberry King": 5, "Wedge, Biggs": 5,
+    # Level 6
+    "Fujin, Raijin": 6, "Elvoret": 6, "X-ATM092": 6, "Grenaldo": 6, "Gerogero": 6,
+    "Iguion": 6, "Abadon": 6, "Trauma": 6, "Oilboyle": 6, "Shumi Tribe": 6, "Krysta": 6,
+    # Level 7
+    "Propagator": 7, "Jumbo Cactaur": 7, "Tri-Point": 7, "Gargantua": 7, "Mobile Type 8": 7,
+    "Sphinxara": 7, "Tiamat": 7, "BGH251F2": 7, "Red Giant": 7, "Catoblepas": 7, "Ultima Weapon": 7,
+    # Level 8
+    "Chubby Chocobo": 8, "Angelo": 8, "Gilgamesh": 8, "MinMog": 8, "Chicobo": 8,
+    "Quezacotl": 8, "Shiva": 8, "Ifrit": 8, "Siren": 8, "Sacred": 8, "Minotaur": 8,
+    # Level 9
+    "Carbuncle": 9, "Diablos": 9, "Leviathan": 9, "Odin": 9, "Pandemonia": 9,
+    "Cerberus": 9, "Alexander": 9, "Phoenix": 9, "Bahumut": 9, "Doomtrain": 9, "Eden": 9,
+    # Level 10
+    "Ward": 10, "Kiros": 10, "Laguna": 10, "Selphie": 10, "Quistis": 10,
+    "Irvine": 10, "Zell": 10, "Rinoa": 10, "Edea": 10, "Seifer": 10, "Squall": 10,
 }
