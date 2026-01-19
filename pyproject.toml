@@ -13,4 +13,5 @@ dependencies = [
 dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
+    "watchdog>=4.0.0",
 ]

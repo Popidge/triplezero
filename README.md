@@ -52,14 +52,18 @@ triplezero/
 │   ├── abstract_game.py          # Base class for MuZero games
 │   └── triple_triad/
 │       ├── __init__.py
+│       ├── cards.py              # Card definitions
 │       ├── config.py             # MuZeroConfig for Triple Triad
 │       ├── game.py               # Game wrapper (MuZero interface)
 │       └── triple_triad.py       # Core game logic
 ├── tests/
 │   ├── __init__.py
 │   ├── test_triple_triad.py      # Core game logic tests
-│   └── test_game_wrapper.py      # Game wrapper tests
-├── cards.txt                     # Card definitions
+│   ├── test_game_wrapper.py      # Game wrapper tests
+│   └── test_built_game.py        # Generated file validation
+├── cards.txt                     # Card definitions (reference)
+├── build_game.py                 # Build script with CI/CD pipeline
+├── triple_triad.py               # Generated output for MuZero
 ├── pyproject.toml
 └── README.md
 ```
@@ -181,7 +185,7 @@ uv run pytest tests/test_triple_triad.py -v
 
 ## Test Coverage
 
-The project includes 76 comprehensive unit tests covering:
+The project includes 94 comprehensive unit tests covering:
 
 - **Card Definitions**: All 10 cards have valid values
 - **Game Initialization**: Proper hand dealing and board setup
@@ -193,6 +197,84 @@ The project includes 76 comprehensive unit tests covering:
 - **Reward Calculation**: Proper reward values
 - **Game Wrapper**: MuZero interface compliance
 - **Configuration**: MuZeroConfig parameters
+- **Generated File**: Build output validation
+
+## Build Pipeline (CI/CD)
+
+This project uses a modern development workflow with a modular codebase for development and a single-file output for MuZero integration:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Development Phase                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  cards.py    │  │ triple_triad │  │   config.py  │          │
+│  │  (card defs) │  │  (game logic)│  │  (MuZeroCfg) │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│         │                 │                 │                    │
+│         └─────────────────┼─────────────────┘                    │
+│                           ▼                                      │
+│                  ┌──────────────┐                               │
+│                  │   pytest     │  ← 94 tests                   │
+│                  │  (validate)  │                               │
+│                  └──────────────┘                               │
+└─────────────────────────────────────────────────────────────────┘
+                           │
+                           ▼ (build_game.py)
+┌─────────────────────────────────────────────────────────────────┐
+│                    Build Phase                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │               triple_triad.py                            │    │
+│  │   (~28KB single file, MuZero-compatible)                │    │
+│  │   - Card definitions                                    │    │
+│  │   - AbstractGame base class                            │    │
+│  │   - MuZeroConfig                                       │    │
+│  │   - TripleTriad game logic                             │    │
+│  │   - Game wrapper                                       │    │
+│  └─────────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 Deployment Phase                                 │
+│          Drop into MuZero's games/ directory                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Build Commands
+
+```bash
+# Build the triple_triad.py file
+python build_game.py
+
+# Build and run all tests
+python build_game.py --test
+
+# Watch for changes and rebuild automatically
+python build_game.py --watch
+
+# Show help
+python build_game.py --help
+```
+
+### Watch Mode
+
+When running in watch mode (`python build_game.py --watch`), the script:
+1. Monitors the `games/` directory for changes
+2. Automatically rebuilds `triple_triad.py` when source files change
+3. Runs the full test suite after each rebuild
+4. Perfect for TDD (Test-Driven Development) workflows
+
+### Generated File Structure
+
+The generated `triple_triad.py` file contains all necessary components for MuZero:
+
+```python
+# Drop this file into MuZero's games/ directory
+from triple_triad import Game, MuZeroConfig
+
+game = Game(seed=42)
+config = MuZeroConfig()
+```
 
 ## Configuration Parameters
 

@@ -1,9 +1,278 @@
-"""Triple Triad core game logic implementation."""
+#!/usr/bin/env python3
+# Auto-generated on 2026-01-19 12:25:58
+# Generated from modular Triple Triad implementation
+# Drop this file into MuZero's games/ directory
+
+import datetime
+import pathlib
+
+import numpy as np
+import torch
+
+__version__ = "1.0.0"
+
+
+# ============== CARD DEFINITIONS ==============
+# Card list for Triple Triad
+# Format: (N, E, S, W) - Top, Right, Bottom, Left values
+
+TRIPLE_TRIAD_CARDS = {
+    "Geezard": (1, 4, 5, 1),
+    "Fungar": (5, 1, 1, 3),
+    "Bite Bug": (1, 3, 3, 5),
+    "Red Bat": (6, 1, 1, 2),
+    "Blobra": (2, 3, 1, 5),
+    "Gayla": (2, 1, 4, 4),
+    "Gesper": (1, 5, 4, 1),
+    "Fastitocalon-F": (3, 5, 2, 1),
+    "Blood Soul": (2, 1, 6, 1),
+    "Caterchipillar": (4, 2, 4, 3),
+}
+
+
+
+# ============== ABSTRACT GAME BASE ==============
+from abc import ABC, abstractmethod
+from typing import Any, Tuple, List, Optional
+import numpy as np
+
+
+class AbstractGame(ABC):
+    """Base class that all MuZero games must inherit from.
+    
+    This class defines the interface that the MuZero algorithm expects from
+    any game implementation. Subclasses must implement all abstract methods.
+    """
+
+    def __init__(self, seed: Optional[int] = None):
+        """Initialize the game with an optional seed for reproducibility.
+        
+        Args:
+            seed: Random seed for game initialization.
+        """
+        pass
+
+    @abstractmethod
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool]:
+        """Apply an action to the game and return the new state.
+        
+        Args:
+            action: The action to apply (from action_space).
+            
+        Returns:
+            Tuple of (observation, reward, done) where:
+                - observation: numpy array representing the game state
+                - reward: float reward for the current player
+                - done: boolean indicating if the game is over
+        """
+        pass
+
+    @abstractmethod
+    def to_play(self) -> int:
+        """Return the current player.
+        
+        Returns:
+            The current player (index from players list).
+        """
+        pass
+
+    @abstractmethod
+    def legal_actions(self) -> List[int]:
+        """Return the list of legal actions for the current state.
+        
+        Returns:
+            List of integers representing legal actions.
+        """
+        pass
+
+    @abstractmethod
+    def reset(self) -> np.ndarray:
+        """Reset the game to its initial state.
+        
+        Returns:
+            Initial observation of the game.
+        """
+        pass
+
+    @abstractmethod
+    def render(self) -> None:
+        """Display the current game state."""
+        pass
+
+    def human_to_action(self) -> int:
+        """Convert human input to an action.
+        
+        This method can be overridden for games that need human input.
+        By default, raises NotImplementedError.
+        
+        Returns:
+            The action selected by the human player.
+        """
+        raise NotImplementedError("Human input not implemented for this game.")
+
+    def expert_agent(self) -> int:
+        """Return an action from an expert agent.
+        
+        This method can be overridden to provide a hard-coded expert
+        agent for evaluation purposes. By default, raises NotImplementedError.
+        
+        Returns:
+            The action selected by the expert agent.
+        """
+        raise NotImplementedError("Expert agent not implemented for this game.")
+
+    def action_to_string(self, action: int) -> str:
+        """Convert an action number to a human-readable string.
+        
+        Args:
+            action: The action number.
+            
+        Returns:
+            String representation of the action.
+        """
+        return str(action)
+
+
+# ============== MUZERO CONFIG ==============
+from typing import Optional
+import pathlib
+
+
+class MuZeroConfig:
+    """Configuration class for MuZero training on Triple Triad.
+    
+    This class contains all the hyperparameters and configuration settings
+    needed for training a MuZero agent on Triple Triad.
+    
+    Based on the tictactoe example from MuZero-general, adapted for
+    the 3x3 board with card mechanics.
+    """
+    
+    def __init__(self):
+        # fmt: off
+        
+        ### Game Configuration
+        self.seed = 0  # Seed for numpy and the game
+        self.max_num_gpus = None  # Fix the maximum number of GPUs to use
+        
+        # Game dimensions
+        self.observation_shape = (3, 3, 11)  # (height, width, channels)
+        self.action_space = list(range(45))  # 5 cards * 9 positions = 45 actions
+        self.players = list(range(2))  # Players 0 and 1
+        self.stacked_observations = 0  # No previous observations needed for this simple game
+        
+        # Game rules
+        self.max_moves = 9  # One card per position on 3x3 board
+        self.num_players = 2
+        
+        # Evaluation
+        self.muzero_player = 0  # MuZero plays first
+        self.opponent = "expert"  # Hard coded agent for evaluation
+        
+        ### Self-Play Configuration
+        self.num_workers = 1  # Number of simultaneous self-play workers
+        self.selfplay_on_gpu = False
+        self.num_simulations = 25  # Number of future moves to simulate
+        self.discount = 1.0  # No discount since game always has 9 moves
+        self.temperature_threshold = None  # Use softmax temperature function
+        
+        # Root prior exploration noise
+        self.root_dirichlet_alpha = 0.1
+        self.root_exploration_fraction = 0.25
+        
+        # UCB formula
+        self.pb_c_base = 19652
+        self.pb_c_init = 1.25
+        
+        ### Network Configuration
+        self.network = "resnet"  # Use residual network
+        self.support_size = 10  # Value and reward encoding range
+        
+        # Residual Network architecture
+        self.downsample = False
+        self.blocks = 1  # Number of residual blocks
+        self.channels = 16  # Number of channels
+        self.reduced_channels_reward = 16
+        self.reduced_channels_value = 16
+        self.reduced_channels_policy = 16
+        self.resnet_fc_reward_layers = [8]
+        self.resnet_fc_value_layers = [8]
+        self.resnet_fc_policy_layers = [8]
+        
+        ### Training Configuration
+        self.results_path = pathlib.Path(__file__).resolve().parents[2] / "results" / pathlib.Path(__file__).stem
+        self.save_model = True
+        self.training_steps = 1000000
+        self.batch_size = 64
+        self.checkpoint_interval = 10
+        self.value_loss_weight = 0.25
+        self.train_on_gpu = True  # Assuming GPU available
+        
+        self.optimizer = "Adam"
+        self.weight_decay = 1e-4
+        self.momentum = 0.9
+        
+        # Learning rate schedule
+        self.lr_init = 0.003
+        self.lr_decay_rate = 1
+        self.lr_decay_steps = 10000
+        
+        ### Replay Buffer Configuration
+        self.replay_buffer_size = 3000
+        self.num_unroll_steps = 20
+        self.td_steps = 20
+        self.PER = True  # Prioritized Experience Replay
+        self.PER_alpha = 0.5
+        
+        # Reanalyze
+        self.use_last_model_value = True
+        self.reanalyse_on_gpu = False
+        
+        # Self-play / training ratio
+        self.self_play_delay = 0
+        self.training_delay = 0
+        self.ratio = None
+        
+        # fmt: on
+    
+    def visit_softmax_temperature_fn(self, trained_steps: int) -> float:
+        """Return the temperature for visit softmax.
+        
+        Args:
+            trained_steps: Number of training steps completed.
+            
+        Returns:
+            Temperature value for action selection.
+        """
+        # Return 1 for the first few steps, then gradually reduce
+        if trained_steps < 100:
+            return 1.0
+        elif trained_steps < 500:
+            return 0.5
+        else:
+            return 0.25
+    
+    def get_uniform_network_config(self) -> dict:
+        """Get network configuration for uniform network (initial training).
+        
+        Returns:
+            Dictionary with network parameters.
+        """
+        return {
+            "observation_shape": self.observation_shape,
+            "action_space_size": len(self.action_space),
+            "num_blocks": self.blocks,
+            "num_channels": self.channels,
+            "num_value_blocks": self.reduced_channels_value,
+            "num_policy_blocks": self.reduced_channels_policy,
+            "num_reward_blocks": self.reduced_channels_reward,
+        }
+
+
+# ============== CORE GAME LOGIC ==============
 from typing import Tuple, List, Optional, Dict, Any
 import numpy as np
 import random
-
-from .cards import TRIPLE_TRIAD_CARDS
 
 
 class TripleTriad:
@@ -436,3 +705,165 @@ class TripleTriad:
             'players': [0, 1],
             'max_moves': 9,
         }
+
+
+# ============== GAME WRAPPER ==============
+from typing import Tuple, List, Optional
+import numpy as np
+
+
+
+class Game(AbstractGame):
+    """Game wrapper for Triple Triad.
+    
+    This class wraps the TripleTriad core logic to provide the interface
+    expected by MuZero, including reward scaling and human input handling.
+    
+    Attributes:
+        env: The underlying TripleTriad game instance.
+    """
+    
+    def __init__(self, seed: Optional[int] = None):
+        """Initialize the game wrapper.
+        
+        Args:
+            seed: Optional random seed for reproducible game initialization.
+        """
+        self.env = TripleTriad(seed=seed)
+    
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool]:
+        """Apply an action to the game.
+        
+        Args:
+            action: Action from the action space.
+            
+        Returns:
+            Tuple of (observation, reward, done).
+        """
+        observation, reward, done = self.env.step(action)
+        # Scale reward by 20 (similar to tictactoe example)
+        return observation, reward * 20, done
+    
+    def to_play(self) -> int:
+        """Return the current player.
+        
+        Returns:
+            The current player (0 or 1).
+        """
+        return self.env.to_play()
+    
+    def legal_actions(self) -> List[int]:
+        """Return the legal actions for the current state.
+        
+        Returns:
+            List of legal action integers.
+        """
+        return self.env.legal_actions()
+    
+    def reset(self) -> np.ndarray:
+        """Reset the game for a new game.
+        
+        Returns:
+            Initial observation of the game.
+        """
+        return self.env.reset()
+    
+    def render(self) -> None:
+        """Display the game observation."""
+        self.env.render()
+        input("Press enter to take a step ")
+    
+    def human_to_action(self) -> int:
+        """Convert human input to an action.
+        
+        Returns:
+            The action selected by the human player.
+        """
+        while True:
+            try:
+                hand = self.env.get_hand(self.env.current_player)
+                print(f"\nYour hand (Player {self.env.current_player + 1}):")
+                for i, card in enumerate(hand):
+                    values = self.env.card_values[card]
+                    print(f"  {i}: {card} (N:{values[0]}, E:{values[1]}, S:{values[2]}, W:{values[3]})")
+                
+                card_index = int(input(f"Enter card index (0-{len(hand)-1}): "))
+                if card_index < 0 or card_index >= len(hand):
+                    print(f"Invalid card index. Must be between 0 and {len(hand)-1}")
+                    continue
+                
+                print("\nBoard positions:")
+                print("  0 1 2")
+                print("  3 4 5")
+                print("  6 7 8")
+                
+                position = int(input("Enter position (0-8): "))
+                if position < 0 or position > 8:
+                    print("Invalid position. Must be between 0 and 8")
+                    continue
+                
+                action = card_index * 9 + position
+                if action in self.env.legal_actions():
+                    return action
+                else:
+                    print("That action is not legal. Try again.")
+                    
+            except ValueError:
+                print("Invalid input. Please enter a number.")
+    
+    def expert_agent(self) -> int:
+        """Return an action from the expert agent.
+        
+        Returns:
+            The action selected by the expert agent.
+        """
+        return self.env.expert_action()
+    
+    def action_to_string(self, action_number: int) -> str:
+        """Convert an action number to a string.
+        
+        Args:
+            action_number: The action number.
+            
+        Returns:
+            String representation of the action.
+        """
+        card_index = action_number // 9
+        position = action_number % 9
+        row = position // 3
+        col = position % 3
+        
+        hand = self.env.get_hand(self.env.current_player)
+        if card_index < len(hand):
+            card_name = hand[card_index]
+        else:
+            card_name = "Unknown"
+        
+        return f"Play {card_name} at row {row}, column {col}"
+    
+    def get_winner(self) -> Optional[int]:
+        """Get the winner of the game.
+        
+        Returns:
+            0 if player 0 wins, 1 if player 1 wins, None if draw.
+        """
+        return self.env._get_winner()
+    
+    def get_board_state(self) -> np.ndarray:
+        """Get the current board state.
+        
+        Returns:
+            The board state array.
+        """
+        return self.env.get_board_state()
+    
+    def get_hand(self, player: int) -> list:
+        """Get a player's hand.
+        
+        Args:
+            player: The player index (0 or 1).
+            
+        Returns:
+            The player's hand.
+        """
+        return self.env.get_hand(player)
