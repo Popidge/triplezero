@@ -4,16 +4,26 @@ A reimplementation of the Triple Triad minigame from Final Fantasy 8, designed f
 
 ## Overview
 
-This project implements the basic "Open" ruleset of Triple Triad with a preselected set of 10 cards. The implementation follows the MuZero framework pattern, using the tictactoe example from the MuZero-general repository as a reference.
+This project implements the basic "Open" ruleset of Triple Triad with all 110 cards from Final Fantasy 8. The implementation follows the MuZero framework pattern, using the tictactoe example from the MuZero-general repository as a reference.
 
 ## Game Rules
 
 ### Basic Setup
 - **Board**: 3×3 grid (9 positions)
 - **Players**: 2 players, each with 5 cards
-- **Cards**: 10 unique cards with 4 directional values (North, East, South, West)
+- **Cards**: 110 unique cards with 4 directional values (North, East, South, West)
 - **Ruleset**: "Open" only (perfect information - both players can see all cards)
 - **Starting Player**: Randomly determined
+
+### Card Dealing (Balanced Hand System)
+Each player receives a balanced hand with one card from each level range:
+- **1 card from levels 1-2** (basic monsters)
+- **1 card from levels 3-4** (intermediate monsters)
+- **1 card from levels 5-6** (advanced monsters/bosses)
+- **1 card from levels 7-8** (powerful bosses/GFs)
+- **1 card from levels 9-10** (player characters - must be unique between players)
+
+This ensures fair hand distribution while maintaining strategic variety.
 
 ### Gameplay Mechanics
 1. Players alternate turns placing one card from their hand onto an empty board position
@@ -25,23 +35,27 @@ This project implements the basic "Open" ruleset of Triple Triad with a preselec
 ### Card Values
 Each card has 4 values: (North, East, South, West)
 - **North** = Top face
-- **East** = Right face  
+- **East** = Right face
 - **South** = Bottom face
 - **West** = Left face
 
+Card values range from 1-10 (where 10 is represented as "A" in the original game).
+
 ### Available Cards
-| Card Name | North | East | South | West |
-|-----------|-------|------|-------|------|
-| Geezard | 1 | 4 | 5 | 1 |
-| Fungar | 5 | 1 | 1 | 3 |
-| Bite Bug | 1 | 3 | 3 | 5 |
-| Red Bat | 6 | 1 | 1 | 2 |
-| Blobra | 2 | 3 | 1 | 5 |
-| Gayla | 2 | 1 | 4 | 4 |
-| Gesper | 1 | 5 | 4 | 1 |
-| Fastitocalon-F | 3 | 5 | 2 | 1 |
-| Blood Soul | 2 | 1 | 6 | 1 |
-| Caterchipillar | 4 | 2 | 4 | 3 |
+All 110 cards from Final Fantasy 8 are included, categorized by level:
+
+| Level | Card Count | Examples |
+|-------|------------|----------|
+| 1 | 11 | Geezard, Fungar, Bite Bug, Red Bat... |
+| 2 | 11 | Grat, Buel, Mesmerize, Glacial Eye... |
+| 3 | 11 | Forbidden, Armadodo, TriFace, Snow Lion... |
+| 4 | 11 | Turtapod, Vysage, T-Rexaur, Bomb... |
+| 5 | 11 | Iron Giant, Behemoth, Chimera, PuPu... |
+| 6 | 11 | Fujin/Raijin, Elvoret, X-ATM092... |
+| 7 | 11 | Propagator, Jumbo Cactaur, Tri-Point... |
+| 8 | 11 | Chubby Chocobo, Angelo, Gilgamesh... |
+| 9 | 11 | Carbuncle, Diablos, Leviathan, Odin... |
+| 10 | 11 | Ward, Kiros, Laguna, Selphie... |
 
 ## Project Structure
 
@@ -185,10 +199,12 @@ uv run pytest tests/test_triple_triad.py -v
 
 ## Test Coverage
 
-The project includes 94 comprehensive unit tests covering:
+The project includes 96 comprehensive unit tests covering:
 
-- **Card Definitions**: All 10 cards have valid values
+- **Card Definitions**: All 110 cards have valid values (1-10)
 - **Game Initialization**: Proper hand dealing and board setup
+- **Balanced Dealing**: Verified each player gets one card per level range
+- **Unique High-Level Cards**: Level 9-10 cards are unique between players
 - **Legal Actions**: Correct action filtering based on hand and board state
 - **Step Function**: Move execution, player switching, and state updates
 - **Flipping Mechanics**: Card flipping when values are higher
@@ -214,7 +230,7 @@ This project uses a modern development workflow with a modular codebase for deve
 │         └─────────────────┼─────────────────┘                    │
 │                           ▼                                      │
 │                  ┌──────────────┐                               │
-│                  │   pytest     │  ← 94 tests                   │
+│                  │   pytest     │  ← 96 tests                   │
 │                  │  (validate)  │                               │
 │                  └──────────────┘                               │
 └─────────────────────────────────────────────────────────────────┘
@@ -224,7 +240,7 @@ This project uses a modern development workflow with a modular codebase for deve
 │                    Build Phase                                   │
 │  ┌─────────────────────────────────────────────────────────┐    │
 │  │               triple_triad.py                            │    │
-│  │   (~28KB single file, MuZero-compatible)                │    │
+│  │   (~42KB single file, MuZero-compatible)                │    │
 │  │   - Card definitions                                    │    │
 │  │   - AbstractGame base class                            │    │
 │  │   - MuZeroConfig                                       │    │
@@ -312,8 +328,7 @@ Potential areas for expansion:
 1. **Additional Rulesets**: Implement "Random", "Same", "Plus", "Combo" rules
 2. **Expert Agent**: Develop a stronger heuristic agent for evaluation
 3. **Visualization**: Add ASCII/Unicode board rendering
-4. **Card Expansion**: Add more cards to the pool
-5. **Performance Optimization**: Optimize for faster training
+4. **Performance Optimization**: Optimize for faster training
 
 ## Dependencies
 
