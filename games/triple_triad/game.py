@@ -34,8 +34,10 @@ class Game(AbstractGame):
             Tuple of (observation, reward, done).
         """
         observation, reward, done = self.env.step(action)
-        # Scale reward by 20 (similar to tictactoe example)
-        return observation, reward * 20, done
+        # Scale reward by 5 (reduced from 20 to accommodate dense flip rewards)
+        # Terminal rewards: +1/-1/0 -> +5/-5/0
+        # Dense rewards: +0.1 per flip -> +0.5, -0.02 no-flip -> -0.1
+        return observation, reward * 5, done
     
     def to_play(self) -> int:
         """Return the current player.

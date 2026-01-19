@@ -459,13 +459,14 @@ class TestWinner:
 class TestRewards:
     """Tests for reward calculation."""
     
-    def test_no_reward_during_game(self):
-        """Test that reward is 0 during game."""
+    def test_dense_reward_during_game(self):
+        """Test that reward is dense during game (+0.1 per flip, -0.02 for no flip)."""
         game = TripleTriad()
         
         _, reward, done = game.step(0)
         
-        assert reward == 0
+        # Reward should be -0.02 (no flip penalty) or +0.1*n (flip rewards)
+        assert reward in [-0.02, 0.1, 0.2, 0.3, 0.4]  # Various flip scenarios
         assert done is False
     
     def test_positive_reward_for_winner(self):

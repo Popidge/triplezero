@@ -113,7 +113,7 @@ class TestRewardScaling:
     """Tests for reward scaling in the wrapper."""
     
     def test_win_reward_scaled(self):
-        """Test that win reward is scaled by 20."""
+        """Test that win reward is scaled by 5."""
         game = Game(seed=42)
         
         # Play until game ends
@@ -121,19 +121,19 @@ class TestRewardScaling:
         while legal:
             observation, reward, done = game.step(legal[0])
             if done:
-                # If this player won, reward should be +20
+                # If this player won, reward should be +5 (1 * 5)
                 if reward > 0:
-                    assert reward == 20
-                # If lost, reward should be -20
+                    assert reward == 5
+                # If lost, reward should be -5 (-1 * 5)
                 elif reward < 0:
-                    assert reward == -20
+                    assert reward == -5
                 # If draw, reward should be 0
                 else:
                     assert reward == 0
             legal = game.legal_actions()
     
-    def test_intermediate_rewards_are_zero(self):
-        """Test that intermediate rewards are 0."""
+    def test_intermediate_rewards_with_dense_reward(self):
+        """Test that intermediate rewards use dense reward structure."""
         game = Game(seed=42)
         
         for _ in range(5):
@@ -141,7 +141,8 @@ class TestRewardScaling:
             if legal:
                 _, reward, done = game.step(legal[0])
                 if not done:
-                    assert reward == 0
+                    # Dense rewards: +0.1 per flip -> +0.5 after scaling, -0.02 no-flip -> -0.1
+                    assert reward in [-0.1, 0, 0.5, 1.0, 1.5, 2.0]  # Various flip counts scaled by 5
 
 
 class TestInterfaceCompliance:
